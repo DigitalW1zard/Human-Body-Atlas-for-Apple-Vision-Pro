@@ -1,0 +1,98 @@
+
+import SwiftUI
+import ARKit
+import RealityKit
+import SceneKit
+
+struct HumanBodyAtlasView: View {
+    @State private var showOrganDetails: Bool = false
+    @State private var selectedOrgan: String? = nil
+
+    var body: some View {
+        ZStack {
+            ARViewContainer()
+                .edgesIgnoringSafeArea(.all)
+
+            VStack {
+                Spacer()
+
+                if showOrganDetails, let organ = selectedOrgan {
+                    Text(organ)
+                        .padding()
+                        .background(Color.black.opacity(0.7))
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .transition(.move(edge: .bottom))
+                        .animation(.easeInOut, value: showOrganDetails)
+                }
+            }
+        }
+    }
+}
+
+struct ARViewContainer: UIViewRepresentable {
+    func makeUIView(context: Context) -> ARView {
+        let arView = ARView(frame: .zero)
+
+        // Load the 3D human body model
+        let bodyScene = try! Entity.load(named: "HumanBody")
+        let anchor = AnchorEntity(world: [0, 0, -1]) // Place 1 meter in front
+        anchor.addChild(bodyScene)
+
+        // Enable interaction
+        arView.installGestures([.rotation, .scale], for: bodyScene)
+
+        // Add anchor to the ARView
+        arView.scene.addAnchor(anchor)
+
+        // Set lighting and environment
+        arView.environment.lighting.resource = EnvironmentResource.lightingFrom(fileName: "sharedEnvironment")
+
+        return arView
+    }
+
+    func updateUIView(_ uiView: ARView, context: Context) {
+        // Handle real-time updates
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        HumanBodyAtlasView()
+    }
+}
+
+extension ARView {
+    /// Installs gestures for rotation and scale
+    func installGestures(_ gestures: [ARView.EntityGestureType], for entity: Entity) {
+        gestures.forEach { gesture in
+            switch gesture {
+            case .rotation:
+                self.enableRotationGesture(for: entity)
+            case .scale:
+                self.enablePinchGesture(for: entity)
+            }
+        }
+    }
+
+    private func enableRotationGesture(for entity: Entity) {
+        let rotationRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(handleRotation(_:)))
+        self.addGestureRecognizer(rotationRecognizer)
+    }
+
+    private func enablePinchGesture(for entity: Entity) {
+        let pinchRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        self.addGestureRecognizer(pinchRecognizer)
+    }
+
+    @objc private func handleRotation(_ sender: UIRotationGestureRecognizer) {
+        // Implement rotation logic
+    }
+
+    @objc private func handlePinch(_ sender: UIPinchGestureRecognizer) {
+        // Implement pinch logic
+    }
+}
+
+// To run the app, ensure the 3D model file "HumanBody" is added to the Xcode project.
+// Include proper ARKit and RealityKit configurations in the project's Info.plist file.
