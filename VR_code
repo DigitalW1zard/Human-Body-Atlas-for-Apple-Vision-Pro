@@ -94,5 +94,4 @@ extension ARView {
     }
 }
 
-// To run the app, ensure the 3D model file "HumanBody" is added to the Xcode project.
-// Include proper ARKit and RealityKit configurations in the project's Info.plist file.
+
